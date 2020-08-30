@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notezoo/screens/note_list.dart';
 import 'package:notezoo/screens/note_page.dart';
+import 'package:notezoo/screens/test.dart';
 
 void main() {
   runApp(MyApp());

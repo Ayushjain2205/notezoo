@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:notezoo/models/note.dart';
 import 'package:notezoo/utilities/database_helper.dart';
 import 'package:intl/intl.dart';
+import 'package:share/share.dart';
+import 'package:flushbar/flushbar.dart';
 
 class NoteScreen extends StatefulWidget {
 
@@ -58,9 +60,8 @@ class NoteScreenState extends State<NoteScreen> {
           }),
           title: Text(widget.appBarHeader),
           actions: <Widget>[
-            IconButton(icon: Icon(Icons.mode_edit), onPressed: () {}),
             IconButton(icon: Icon(Icons.share), onPressed: () {
-
+              share(context,note);
             }),
           ],
         ),
@@ -68,6 +69,8 @@ class NoteScreenState extends State<NoteScreen> {
           children: <Widget>[
             TextField(
               controller: titleController,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
               onChanged: (value){
                 updateTitle();
               },
@@ -75,8 +78,7 @@ class NoteScreenState extends State<NoteScreen> {
                 border: OutlineInputBorder(borderSide:BorderSide.none),
                 hintText: 'Title',
               ),
-            ),
-            TextField(
+            ),TextField(
               controller: bodyController,
               keyboardType: TextInputType.multiline,
               maxLines: null,
@@ -87,7 +89,8 @@ class NoteScreenState extends State<NoteScreen> {
                 border: OutlineInputBorder(borderSide:BorderSide.none),
                 hintText: 'Description',
               ),
-            )
+            ),
+
           ],
         ),
       ),
@@ -112,10 +115,17 @@ class NoteScreenState extends State<NoteScreen> {
     Scaffold.of(context).showSnackBar(snackBar);
   }
 
+  void showSimpleFlushbar(BuildContext context,String message) {
+    Flushbar(
+      message: message,
+      duration: Duration(seconds: 3),
+    )..show(context);
+  }
+
   void _save() async{
 
     popNote();
-    note.date=DateFormat.MMMMd('en_US').format(new DateTime.now());
+    note.date=DateFormat.MMMd('en_US').add_jm().format(new DateTime.now());
     int result;
     if(note.id!=null){ //Note exists and needs to UPDATED
       result=await databaseHelper.updateNote(note);
@@ -125,11 +135,16 @@ class NoteScreenState extends State<NoteScreen> {
     }
 
     if(result!=0){ //Successfully saved
-      _showSnackBar(context,'Note Saved Successfully');
+      showSimpleFlushbar(context,'Note Saved Successfully');
     }
     else{
-      _showSnackBar(context,'Error while saving note');
+      showSimpleFlushbar(context,'Error while saving Note');
     }
+  }
+
+  void share(BuildContext context,Note note){
+    final String text="${note.title}\n\n${note.description}\n${note.date}\n\nCreated Using NoteZoo!!!";
+    Share.share(text,subject: note.title);
   }
 
 }
